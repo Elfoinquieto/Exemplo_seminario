@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('books', function (Blueprint $table) {
+        Schema::create('compromissos', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('author_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('title', 150);
-            $table->string('isbn', 13)->unique();
-            $table->string('genre', 50);
-            $table->text('description')->nullable();
+            $table->string('titulo', 200);
+            $table->text('descricao')->nullable();
+            $table->dateTime('data_compromisso');
+            $table->dateTime('notificacao_enviada_em')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('books');
+        Schema::dropIfExists('compromissos');
     }
 };

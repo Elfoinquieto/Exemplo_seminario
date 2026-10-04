@@ -2,8 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MainController;
-use App\Http\Controllers\AuthorController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Schedule;
+
+// Agendamento automático de envio de lembretes
+Schedule::command('compromissos:enviar-lembretes')->dailyAt('08:00');
 
 Route::middleware(['guest'])->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -14,23 +18,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
     Route::get('/', [MainController::class, 'index'])->name('home');
 
-    Route::get('/autores', [AuthorController::class, 'listAuthors'])->name('listarAutores');
-    Route::get('/autores/cadastrar', [AuthorController::class, 'formAuthor'])->name('cadastroAutor');
-    Route::post('/autores/salvar', [AuthorController::class, 'saveAuthor'])->name('salvarAutor');
-    Route::get('/autores/editar/{id}', [AuthorController::class, 'editAuthor'])->name('editarAutor');
-    Route::put('/autores/atualizar/', [AuthorController::class, 'updateAuthor'])->name('atualizarAutor');
-    Route::get('/autores/{id}', [AuthorController::class, 'showAuthor'])->name('detalhesAutor');
-    Route::delete('/autores/deletar/{id}', [AuthorController::class, 'deletarAutor'])->name('deletarAutor');
+    Route::get('/compromissos/cadastrar', [MainController::class, 'formCompromisso'])->name('cadastroCompromisso');
+    Route::post('/compromissos/salvar', [MainController::class, 'saveCompromisso'])->name('salvarCompromisso');
+    Route::get('/compromissos/editar/{id}', [MainController::class, 'editCompromisso'])->name('editarCompromisso');
+    Route::put('/compromissos/atualizar', [MainController::class, 'updateCompromisso'])->name('atualizarCompromisso');
+    Route::get('/compromissos/{id}', [MainController::class, 'showCompromisso'])->name('detalhesCompromisso');
+    Route::delete('/compromissos/deletar/{id}', [MainController::class, 'deletarCompromisso'])->name('deletarCompromisso');
 
+    Route::get('/listDeletedCompromissos', [MainController::class, 'listDeletedCompromissos'])->name('listDeletedCompromissos');
+    Route::get('/hardDelete-compromisso/{id}', [MainController::class, 'hardDeleteCompromisso'])->name('hardDelete');
+    Route::get('/restore-compromisso/{id}', [MainController::class, 'restoreCompromisso'])->name('restore');
 
-    Route::get('/livros', [MainController::class, 'listBooks'])->name('listarLivros');
-    Route::get('/livros/cadastrar', [MainController::class, 'formBook'])->name('cadastroLivro');
-    Route::post('/livros/salvar', [MainController::class, 'saveBook'])->name('salvarLivro');
-    Route::get('/livros/editar/{id}', [MainController::class, 'editBook'])->name('editarLivro');
-    Route::put('/livros/atualizar/', [MainController::class, 'updateBook'])->name('atualizarLivro');
-    Route::get('/livros/{id}', [MainController::class, 'showBook'])->name('detalhesLivro');
-    Route::delete('/livros/deletar/{id}', [MainController::class, 'deletarLivro'])->name('deletarLivro');
-    Route::get('/listDeletedBooks', [MainController::class, 'listDeletedBooks'])->name('listDeletedBooks');
-    Route::get('/hardDelete-book/{id}', [MainController::class, 'hardDeleteBook'])->name('hardDelete');
-    Route::get('/restore-book/{id}', [MainController::class, 'restoreBook'])->name('restore');
+    // Gestão de Notificações
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 });

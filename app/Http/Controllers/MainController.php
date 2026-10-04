@@ -1,157 +1,144 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Http\Controllers\AuthController;
-use Illuminate\Support\Facades\Auth;
 
+use App\Http\Controllers\AuthController;
+use App\Models\Compromisso;
+use App\Services\Operations;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MainController extends Controller
 {
-     public function index()
+    public function index()
     {
-        $books = Auth::user()->books;
+        $compromissos = Auth::user()->compromissos;
 
         return view('home', [
-
-            'books' => $books
+            'compromissos' => $compromissos
         ]);
     }
 
-    public function formBook()
+    public function formCompromisso()
     {
-        $authors = Auth::user()->authors;
-        return view('books.form', ['authors' => $authors]);
+        return view('form');
     }
 
-    public function saveBook(Request $request)
+    public function saveCompromisso(Request $request)
     {
         $request->validate([
-            'title' => 'required|min:2|max:200',
-            'author_id' => 'required|exists:authors,id',
-            'isbn' => 'required|string|max:13',
-            'genre' => ['required', Rule::in(Book::GENRES)],
-            'description' => 'required|max:2000',
+            'titulo' => 'required|min:2|max:200',
+            'descricao' => 'required|max:2000',
+            'data_compromisso' => 'required|date|after:now',
         ], [
-            'title.required' => 'O título do livro é obrigatório.',
-            'title.min' => 'O título deve ter pelo menos :min caracteres.',
-            'title.max' => 'O título não pode passar de :max caracteres.',
-            'author_id.required' => 'O autor do livro é obrigatório.',
-            'author_id.exists' => 'O autor selecionado é inválido.',
-            'isbn.required' => 'O código ISBN do livro é obrigatório.',
-            'genre.required' => 'O gênero do livro é obrigatório.',
-            'genre.in' => 'Selecione um gênero válido da lista.',
-            'description.required' => 'A descrição do livro é obrigatório.',
-            'description.max' => 'A descrição não pode ultrapassar :max caracteres.',
+            'titulo.required' => 'O título do compromisso é obrigatório.',
+            'titulo.min' => 'O título deve ter pelo menos :min caracteres.',
+            'titulo.max' => 'O título não pode passar de :max caracteres.',
+            'descricao.required' => 'A descrição do compromisso é obrigatória.',
+            'descricao.max' => 'A descrição não pode ultrapassar :max caracteres.',
+            'data_compromisso.required' => 'A data do compromisso é obrigatória.',
+            'data_compromisso.date' => 'Informe uma data e hora válidas.',
+            'data_compromisso.after' => 'A data do compromisso deve ser no futuro.',
         ]);
 
-        $book = new Book();
-        $book->user_id = Auth::id();
-        $book->title = $request->title;
-        $book->author_id = $request->author_id;
-        $book->isbn = $request->isbn;
-        $book->genre = $request->genre;
-        $book->description = $request->description;
+        $compromisso = new Compromisso();
+        $compromisso->user_id = Auth::id();
+        $compromisso->titulo = $request->titulo;
+        $compromisso->descricao = $request->descricao;
+        $compromisso->data_compromisso = $request->data_compromisso;
 
-        $book->save();
+        $compromisso->save();
 
-        return redirect()->route('home')->with('success', 'Livro cadastrado com sucesso!');
+        return redirect()->route('home')->with('success', 'Compromisso cadastrado com sucesso!');
     }
 
-    public function editBook($id)
+    public function editCompromisso($id)
     {
         $decrypted_id = Operations::decryptId($id);
-        $book = Auth::user()->books()->findOrFail($decrypted_id);
-        $authors = Auth::user()->authors;
+        $compromisso = Auth::user()->compromissos()->findOrFail($decrypted_id);
 
-        return view('books.form', ['book' => $book, 'authors' => $authors]);
+        return view('form', ['compromisso' => $compromisso]);
     }
 
-    public function updateBook(Request $request)
+    public function updateCompromisso(Request $request)
     {
         $request->validate([
-            'book_id' => 'required',
-            'title' => 'required|min:2|max:200',
-            'author_id' => 'required|exists:authors,id',
-            'isbn' => 'required|string|max:13',
-            'genre' => ['required', Rule::in(Book::GENRES)],
-            'description' => 'required|max:2000',
+            'compromisso_id' => 'required',
+            'titulo' => 'required|min:2|max:200',
+            'descricao' => 'required|max:2000',
+            'data_compromisso' => 'required|date',
         ], [
-            'title.required' => 'O título do livro é obrigatório.',
-            'title.min' => 'O título deve ter pelo menos :min caracteres.',
-            'title.max' => 'O título não pode passar de :max caracteres.',
-            'author_id.required' => 'O autor do livro é obrigatório.',
-            'author_id.exists' => 'O autor selecionado é inválido.',
-            'isbn.required' => 'O código ISBN do livro é obrigatório.',
-            'genre.required' => 'O gênero do livro é obrigatório.',
-            'genre.in' => 'Selecione um gênero válido da lista.',
-            'description.required' => 'A descrição do livro é obrigatório.',
-            'description.max' => 'A descrição não pode ultrapassar :max caracteres.',
+            'compromisso_id.required' => 'ID do compromisso inválido.',
+            'titulo.required' => 'O título do compromisso é obrigatório.',
+            'titulo.min' => 'O título deve ter pelo menos :min caracteres.',
+            'titulo.max' => 'O título não pode passar de :max caracteres.',
+            'descricao.required' => 'A descrição do compromisso é obrigatória.',
+            'descricao.max' => 'A descrição não pode ultrapassar :max caracteres.',
+            'data_compromisso.required' => 'A data do compromisso é obrigatória.',
+            'data_compromisso.date' => 'Informe uma data e hora válidas.',
         ]);
 
-        $id = Operations::decryptId($request->book_id);
+        $id = Operations::decryptId($request->compromisso_id);
 
-        $book = Auth::user()->books()->find($id);
+        $compromisso = Auth::user()->compromissos()->find($id);
 
-        if (!$book) {
-            return redirect()->route('home')->with('error', 'Livro não encontrado.');
+        if (!$compromisso) {
+            return redirect()->route('home')->with('error', 'Compromisso não encontrado.');
         }
 
-        $book->update([
-            'title' => $request->title,
-            'author_id' => $request->author_id,
-            'isbn' => $request->isbn,
-            'genre' => $request->genre,
-            'description' => $request->description,
+        $compromisso->update([
+            'titulo' => $request->titulo,
+            'descricao' => $request->descricao,
+            'data_compromisso' => $request->data_compromisso,
         ]);
 
-        return redirect()->route('home')->with('success', 'Livro atualizado com sucesso!');
+        return redirect()->route('home')->with('success', 'Compromisso atualizado com sucesso!');
     }
 
-    public function showBook($id)
+    public function showCompromisso($id)
     {
-        $book = Auth::user()->books()->findOrFail($id);
+        $compromisso = Auth::user()->compromissos()->findOrFail($id);
 
-        return view('books.show', ['book' => $book]);
+        return view('show', ['compromisso' => $compromisso]);
     }
 
-    public function deletarLivro($id)
+    public function deletarCompromisso($id)
     {
         $decrypted_id = Operations::decryptId($id);
 
-        $book = Auth::user()->books()->findOrFail($decrypted_id);
-        if (!$book) {
+        $compromisso = Auth::user()->compromissos()->findOrFail($decrypted_id);
+        if (!$compromisso) {
             return redirect()->route('home');
         }
-        $book->delete();
+        $compromisso->delete();
         return redirect()->route('home');
     }
 
-    public function listDeletedBooks()
+    public function listDeletedCompromissos()
     {
-        $listaExcluidos = Book::onlyTrashed()->get();
-        return view('books.list_deleted', ['listaExcluidos' => $listaExcluidos]);
+        $listaExcluidos = Compromisso::onlyTrashed()->where('user_id', Auth::id())->get();
+        return view('list_deleted', ['listaExcluidos' => $listaExcluidos]);
     }
 
-    public function hardDeleteBook($id)
+    public function hardDeleteCompromisso($id)
     {
-        $bookId = Operations::decryptId($id);
-        $book = Book::withTrashed()->find($bookId);
-        if (!$book) {
+        $compromissoId = Operations::decryptId($id);
+        $compromisso = Compromisso::withTrashed()->where('user_id', Auth::id())->find($compromissoId);
+        if (!$compromisso) {
             return redirect()->route('home');
         }
-        $book->forceDelete();
+        $compromisso->forceDelete();
         return redirect()->route('home');
     }
 
-    public function restoreBook($id)
+    public function restoreCompromisso($id)
     {
-        $bookId = Operations::decryptId($id);
-        $book = Book::withTrashed()->find($bookId);
-        if (!$book) {
+        $compromissoId = Operations::decryptId($id);
+        $compromisso = Compromisso::withTrashed()->where('user_id', Auth::id())->find($compromissoId);
+        if (!$compromisso) {
             return redirect()->route('home');
         }
-        $book->restore();
+        $compromisso->restore();
         return redirect()->route('home');
     }
 }
