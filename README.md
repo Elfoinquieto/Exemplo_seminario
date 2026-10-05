@@ -2,8 +2,7 @@ AgendApp - Notificações no Sistema e E-mail (Notification)
 Módulo 1: Seminário Técnico de Funcionalidades Laravel
 
    
-PDF
-+ 2
+
 
 Disciplina: Desenvolvimento Web 2 — IFPR Campus Curitiba   
 PDF
@@ -12,8 +11,7 @@ Professor: Jair José Ferronato
 PDF
 
 Tema 09: Notificações no Sistema e E-mail (Notification)   
-PDF
-+ 1
+
 
 Integrantes da Dupla: Cauan de Souza Valter Stocco e João Pedro   
 PDF
@@ -36,7 +34,7 @@ Driver de E-mail / SMTP: Brevo (SMTP Relay)
 Canais de Notificação: mail e database
 
    
-PDF
+
 
 📋 Requisitos para Execução e Instalação
 1. Pré-requisitos
