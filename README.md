@@ -1,59 +1,122 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+AgendApp - Notificações no Sistema e E-mail (Notification)
+Módulo 1: Seminário Técnico de Funcionalidades Laravel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+   
+PDF
++ 2
 
-## About Laravel
+Disciplina: Desenvolvimento Web 2 — IFPR Campus Curitiba   
+PDF
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Professor: Jair José Ferronato   
+PDF
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Tema 09: Notificações no Sistema e E-mail (Notification)   
+PDF
++ 1
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Integrantes da Dupla: Cauan de Souza Valter Stocco e João Pedro   
+PDF
 
-## Learning Laravel
+📌 Contexto e Problema de Mercado
+Em sistemas corporativos e plataformas de agendamento, a falta de alertas automáticos sobre compromissos gera esquecimentos e perdas de prazos importantes.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+A funcionalidade de Notifications do Laravel resolve esse problema ao abstrair múltiplos canais de entrega (como e-mail e banco de dados) em uma única classe unificada. No AgendApp, a funcionalidade é aplicada para garantir que os usuários recebam lembretes automáticos de compromissos agendados para o dia seguinte, gravando um alerta na interface do sistema e enviando uma notificação por e-mail para a caixa de entrada real.   
+PDF
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+🛠️ Recursos e Tecnologias Utilizadas
+Framework: Laravel 10/11
 
-## Laravel Sponsors
+Linguagem: PHP 8.x
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Manipulação de Datas: Carbon\Carbon
 
-### Premium Partners
+Driver de E-mail / SMTP: Brevo (SMTP Relay)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Canais de Notificação: mail e database
 
-## Contributing
+   
+PDF
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+📋 Requisitos para Execução e Instalação
+1. Pré-requisitos
+PHP >= 8.1
 
-## Code of Conduct
+Composer instalado
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Servidor de banco de dados (MySQL/MariaDB)
 
-## Security Vulnerabilities
+2. Passo a Passo de Configuração Local
+Clonar o Repositório:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Bash
+git clone https://github.com/seu-usuario/agendapp-seminario.git
+cd agendapp-seminario
+Instalar Dependências:
 
-## License
+Bash
+composer install
+Configurar o Arquivo de Ambiente (.env):
+Crie uma cópia do arquivo .env.example:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Bash
+cp .env.example .env
+Gerar a Chave da Aplicação:
+
+Bash
+php artisan key:generate
+Configurar as Variáveis no .env:
+Ajuste a timezone e insira as credenciais do servidor SMTP (Brevo Relay):
+
+Snippet de código
+APP_TIMEZONE=America/Sao_Paulo
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=agendapp
+DB_USERNAME=root
+DB_PASSWORD=
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp-relay.brevo.com
+MAIL_PORT=587
+MAIL_USERNAME="bc8aab001@smtp-brevo.com"
+MAIL_PASSWORD="SUA_CHAVE_SMTP_DO_BREVO"
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS="seu_email@dominio.com"
+MAIL_FROM_NAME="AgendApp"
+Executar Migrations e Criar a Tabela de Notificações:
+
+Bash
+php artisan notification:table
+php artisan migrate
+🚀 Como Executar e Testar a Funcionalidade
+1. Disparo Manual via Comando Artisan
+Para executar a busca por compromissos do dia seguinte e disparar o e-mail/notificação diretamente pelo terminal:
+
+Bash
+php artisan compromissos:enviar-lembretes
+2. Disparo Automático em Sessões de Usuário (Middleware)
+O sistema possui o VerificarLembretesMiddleware registrado no grupo web. Ele verifica e envia os e-mails pendentes em segundo plano a cada interação do usuário no site, limitando a execução via cache (a cada 30 minutos) para manter a alta performance da aplicação.
+
+💡 Dificuldades Encontradas e Boas Práticas (Pegadinhas Técnicas)
+Durante a implementação do seminário, foram superados os seguintes pontos críticos:
+
+Fuso Horário (Timezone):
+
+Por padrão, a aplicação operava em UTC. Isso fazia com que o método Carbon::tomorrow() gerasse um dia incorreto em relação ao horário de Brasília.
+
+Solução: Alteração de 'timezone' => 'America/Sao_Paulo' em config/app.php e execução de php artisan config:clear.
+
+Comparação de Colunas DateTime no Eloquent:
+
+O campo data_compromisso armazena data e hora (2026-10-05 16:11:00). Consultas usando where() simples falhavam por tentar comparar com 00:00:00.
+
+Solução: Ajuste da busca para usar whereDate('data_compromisso', Carbon::tomorrow()) ou a instrução SQL whereRaw('DATE(data_compromisso) = ?', [$dataAmanha]).
+
+Bloqueio de Autenticação SMTP no Gmail (535 BadCredentials):
+
+O serviço do Gmail recusava a autenticação direta por senha de app.
+
+Solução: Troca para o Brevo (SMTP Relay) na porta 587 com criptografia tls, garantindo o envio correto e a entrega na caixa de entrada do usuário.
