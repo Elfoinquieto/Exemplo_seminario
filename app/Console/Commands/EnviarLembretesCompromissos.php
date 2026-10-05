@@ -18,12 +18,8 @@ class EnviarLembretesCompromissos extends Command
 
     public function handle()
     {
-        // Define a janela de tempo do dia seguinte (00:00:00 até 23:59:59 de amanhã)
-        $inicioAmanha = Carbon::tomorrow()->startOfDay();
-        $fimAmanha = Carbon::tomorrow()->endOfDay();
-
         // Busca compromissos que acontecem amanhã e ainda NÃO receberam notificação
-        $compromissos = Compromisso::whereBetween('data_compromisso', [$inicioAmanha, $fimAmanha])
+        $compromissos = Compromisso::whereDate('data_compromisso', \Carbon\Carbon::tomorrow())
             ->whereNull('notificacao_enviada_em')
             ->get();
 
