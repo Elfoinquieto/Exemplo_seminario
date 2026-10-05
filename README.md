@@ -1,4 +1,5 @@
 AgendApp - Notificações no Sistema e E-mail (Notification)
+
 Módulo 1: Seminário Técnico de Funcionalidades Laravel
 
 Disciplina: Desenvolvimento Web 2 — IFPR Campus Curitiba
@@ -31,7 +32,9 @@ Canais de Notificação: mail e database
 PDF
 
 📋 Requisitos para Execução e Instalação
+
 1. Pré-requisitos
+
 PHP >= 8.1
 
 Composer instalado
@@ -39,53 +42,81 @@ Composer instalado
 Servidor de banco de dados (MySQL/MariaDB)
 
 2. Passo a Passo de Configuração Local
+
 Clonar o Repositório:
 
 git clone https://github.com/seu-usuario/agendapp-seminario.git
+
 cd agendapp-seminario
+
 Instalar Dependências:
 
 composer install
+
 Configurar o Arquivo de Ambiente (.env):
+
 Crie uma cópia do arquivo .env.example:
 
 cp .env.example .env
+
 Gerar a Chave da Aplicação:
 
 php artisan key:generate
+
 Configurar as Variáveis no .env:
+
 Ajuste a timezone e insira as credenciais do servidor SMTP (Brevo Relay):
 
 APP_TIMEZONE=America/Sao_Paulo
 
 DB_CONNECTION=mysql
+
 DB_HOST=127.0.0.1
+
 DB_PORT=3306
+
 DB_DATABASE=agendapp
+
 DB_USERNAME=root
+
 DB_PASSWORD=
 
 MAIL_MAILER=smtp
+
 MAIL_HOST=smtp-relay.brevo.com
+
 MAIL_PORT=587
+
 MAIL_USERNAME="bc8aab001@smtp-brevo.com"
+
 MAIL_PASSWORD="SUA_CHAVE_SMTP_DO_BREVO"
+
 MAIL_ENCRYPTION=tls
+
 MAIL_FROM_ADDRESS="seu_email@dominio.com"
+
 MAIL_FROM_NAME="AgendApp"
+
 Executar Migrations e Criar a Tabela de Notificações:
 
 php artisan notification:table
+
 php artisan migrate
+
 🚀 Como Executar e Testar a Funcionalidade
+
 1. Disparo Manual via Comando Artisan
+
 Para executar a busca por compromissos do dia seguinte e disparar o e-mail/notificação diretamente pelo terminal:
 
 php artisan compromissos:enviar-lembretes
+
 2. Disparo Automático em Sessões de Usuário (Middleware)
+
 O sistema possui o VerificarLembretesMiddleware registrado no grupo web. Ele verifica e envia os e-mails pendentes em segundo plano a cada interação do usuário no site, limitando a execução via cache (a cada 30 minutos) para manter a alta performance da aplicação.
 
 💡 Dificuldades Encontradas e Boas Práticas (Pegadinhas Técnicas)
+
 Durante a implementação do seminário, foram superados os seguintes pontos críticos:
 
 Fuso Horário (Timezone):
