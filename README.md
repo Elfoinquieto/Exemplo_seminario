@@ -1,138 +1,235 @@
-AgendApp - Notificações no Sistema e E-mail (Notification)
+# Guia Prático: Implementando Notificações no Laravel (`Notification`)
 
-Módulo 1: Seminário Técnico de Funcionalidades Laravel
+> **Módulo 1: Seminário Técnico de Funcionalidades Laravel**  
+> **Disciplina:** Desenvolvimento Web 2 — IFPR Campus Curitiba  
+> **Professor:** Jair José Ferronato  
+> **Tema 09:** Notificações no Sistema e E-mail (`Illuminate\Notifications\Notification`)  
+> **Dupla:** Cauan de Souza Valter Stocco e João Pedro
 
-Disciplina: Desenvolvimento Web 2 — IFPR Campus Curitiba
+---
 
-Professor: Jair José Ferronato 
+## 📌 1. O que são e por que usar Laravel Notifications?
 
-Tema 09: Notificações no Sistema e E-mail (Notification)
+O recurso de **Notifications** do Laravel é uma abstração desenhada para disparar mensagens através de **múltiplos canais de comunicação** (E-mail, Banco de Dados, SMS, Broadcast/WebSockets, Slack, etc.) utilizando uma **única classe responsável**.
 
-Integrantes da Dupla: Cauan de Souza Valter Stocco e João Pedro 
+### Notifications vs. Mailables
+- **`Mailable`:** Utilizado para e-mails pontuais com layouts HTML complexos e exclusivos (ex: faturas e relatórios).
+- **`Notification`:** Ideal para alertas de sistema que precisam notificar o usuário por mais de um meio simultaneamente (ex: gravar um alerta no ícone de "sino" do site **E** enviar um e-mail de aviso).
 
-📌 Contexto e Problema de Mercado:
+---
 
-Em sistemas corporativos e plataformas de agendamento, a falta de alertas automáticos sobre compromissos gera esquecimentos e perdas de prazos importantes.
+## 🛠️ 2. Requisitos e Configuração do Ambiente
 
-A funcionalidade de Notifications do Laravel resolve esse problema ao abstrair múltiplos canais de entrega (como e-mail e banco de dados) em uma única classe unificada. No AgendApp, a funcionalidade é aplicada para garantir que os usuários recebam lembretes automáticos de compromissos agendados para o dia seguinte, gravando um alerta na interface do sistema e enviando uma notificação por e-mail para a caixa de entrada real. 
+Para utilizar os canais de **Banco de Dados** (`database`) e **E-mail** (`mail`), siga o passo a passo de configuração abaixo em seu projeto:
 
-🛠️ Recursos e Tecnologias Utilizadas
+### 2.1 Gerar a Tabela de Notificações
+Execute no terminal os comandos para criar a migration nativa da tabela `notifications` e aplicá-la no banco de dados:
 
-Framework: Laravel 10/11
+```bash
+php artisan notification:table
+php artisan migrate
+```
+> *A tabela `notifications` armazenará os alertas gerados para exibição na interface do sistema (`database`).*
 
-Linguagem: PHP 8.x
+### 2.2 Configurar o Provedor SMTP no `.env`
+No arquivo `.env`, defina o fuso horário e as credenciais do seu serviço de e-mail. Recomenda-se utilizar o **Brevo (SMTP Relay)** na porta 587 para evitar erros de autenticação (`535 BadCredentials`) comuns no Gmail:
 
-Manipulação de Datas: Carbon\Carbon
-
-Driver de E-mail / SMTP: Brevo (SMTP Relay)
-
-Canais de Notificação: mail e database
-
-   
-PDF
-
-📋 Requisitos para Execução e Instalação
-
-1. Pré-requisitos
-
-PHP >= 8.1
-
-Composer instalado
-
-Servidor de banco de dados (MySQL/MariaDB)
-
-2. Passo a Passo de Configuração Local
-
-Clonar o Repositório:
-
-git clone https://github.com/seu-usuario/agendapp-seminario.git
-
-cd agendapp-seminario
-
-Instalar Dependências:
-
-composer install
-
-Configurar o Arquivo de Ambiente (.env):
-
-Crie uma cópia do arquivo .env.example:
-
-cp .env.example .env
-
-Gerar a Chave da Aplicação:
-
-php artisan key:generate
-
-Configurar as Variáveis no .env:
-
-Ajuste a timezone e insira as credenciais do servidor SMTP (Brevo Relay):
-
+```env
 APP_TIMEZONE=America/Sao_Paulo
 
-DB_CONNECTION=mysql
-
-DB_HOST=127.0.0.1
-
-DB_PORT=3306
-
-DB_DATABASE=agendapp
-
-DB_USERNAME=root
-
-DB_PASSWORD=
-
 MAIL_MAILER=smtp
-
 MAIL_HOST=smtp-relay.brevo.com
-
 MAIL_PORT=587
-
-MAIL_USERNAME="bc8aab001@smtp-brevo.com"
-
-MAIL_PASSWORD="SUA_CHAVE_SMTP_DO_BREVO"
-
+MAIL_USERNAME="seu_login_smtp_brevo"
+MAIL_PASSWORD="sua_chave_smtp_brevo"
 MAIL_ENCRYPTION=tls
-
 MAIL_FROM_ADDRESS="seu_email@dominio.com"
+MAIL_FROM_NAME="SeuSistema"
+```
 
-MAIL_FROM_NAME="AgendApp"
+---
 
-Executar Migrations e Criar a Tabela de Notificações:
+## 📐 3. Estrutura da Classe Notification
 
-php artisan notification:table
+### 3.1 Criar a Notificação via Artisan
+Rode o comando de criação no terminal:
 
-php artisan migrate
+```bash
+php artisan make:notification ExemploAlertaNotification
+```
+> *A classe gerada ficará localizada em `app/Notifications/ExemploAlertaNotification.php`.*
 
-🚀 Como Executar e Testar a Funcionalidade
+### 3.2 Estruturação do Código
+Abaixo está o exemplo de uma classe de notificação configurada para enviar por e-mail e gravar no banco de dados:
 
-1. Disparo Manual via Comando Artisan
+```php
+namespace App\Notifications;
 
-Para executar a busca por compromissos do dia seguinte e disparar o e-mail/notificação diretamente pelo terminal:
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
-php artisan compromissos:enviar-lembretes
+class ExemploAlertaNotification extends Notification
+{
+    use Queueable;
 
-2. Disparo Automático em Sessões de Usuário (Middleware)
+    public $dados;
 
-O sistema possui o VerificarLembretesMiddleware registrado no grupo web. Ele verifica e envia os e-mails pendentes em segundo plano a cada interação do usuário no site, limitando a execução via cache (a cada 30 minutos) para manter a alta performance da aplicação.
+    public function __construct($dados)
+    {
+        $this->dados = $dados;
+    }
 
-💡 Dificuldades Encontradas e Boas Práticas (Pegadinhas Técnicas)
+    // 1. Define os canais de entrega ativos para esta notificação
+    public function via(object $notifiable): array
+    {
+        return ['mail', 'database'];
+    }
 
-Durante a implementação do seminário, foram superados os seguintes pontos críticos:
+    // 2. Formatação do conteúdo para o canal E-mail ('mail')
+    public function toMail(object $notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Aviso: Você tem uma nova atualização!')
+            ->greeting('Olá, ' . $notifiable->name . '!')
+            ->line('Resumo da atualização: ' . $this->dados->titulo)
+            ->action('Visualizar no Sistema', url('/dashboard'))
+            ->line('Obrigado por usar nossa aplicação!');
+    }
 
-Fuso Horário (Timezone):
+    // 3. Formatação dos dados gravados no banco para o canal 'database' (tabela 'notifications')
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'item_id' => $this->dados->id,
+            'titulo' => $this->dados->titulo,
+            'mensagem' => 'Sua tarefa "' . $this->dados->titulo . '" expira em breve.',
+        ];
+    }
+}
+```
 
-Por padrão, a aplicação operava em UTC. Isso fazia com que o método Carbon::tomorrow() gerasse um dia incorreto em relação ao horário de Brasília.
+---
 
-Solução: Alteração de 'timezone' => 'America/Sao_Paulo' em config/app.php e execução de php artisan config:clear.
+## 🚀 4. Como Disparar as Notificações
 
-Comparação de Colunas DateTime no Eloquent:
+O Model que receberá os alertas (geralmente `App\Models\User`) **deve possuir a trait `Notifiable`**:
 
-O campo data_compromisso armazena data e hora (2026-10-05 16:11:00). Consultas usando where() simples falhavam por tentar comparar com 00:00:00.
+```php
+namespace App\Models;
 
-Solução: Ajuste da busca para usar whereDate('data_compromisso', Carbon::tomorrow()) ou a instrução SQL whereRaw('DATE(data_compromisso) = ?', [$dataAmanha]).
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-Bloqueio de Autenticação SMTP no Gmail (535 BadCredentials):
+class User extends Authenticatable
+{
+    use Notifiable; // Permite executar $user->notify(...)
+}
+```
 
-O serviço do Gmail recusava a autenticação direta por senha de app.
+### Método 1: Disparo Direto pelo Usuário
+```php
+$user = User::find(1);
+$user->notify(new ExemploAlertaNotification($registro));
+```
 
-Solução: Troca para o Brevo (SMTP Relay) na porta 587 com criptografia tls, garantindo o envio correto e a entrega na caixa de entrada do usuário.
+### Método 2: Disparo em Lote usando a Facade
+```php
+use Illuminate\Support\Facades\Notification;
+
+$usuarios = User::all();
+Notification::send($usuarios, new ExemploAlertaNotification($registro));
+```
+
+---
+
+## 💻 5. Lendo Notificações no Blade (`database`)
+
+Ao salvar as notificações no banco, o Laravel injeta automaticamente métodos de consulta no usuário autenticado:
+
+### 5.1 Buscar Notificações no Controller
+```php
+// Retorna apenas as notificações NÃO LIDAS
+$naoLidas = auth()->user()->unreadNotifications;
+
+// Retorna TODAS as notificações do usuário
+$todas = auth()->user()->notifications;
+```
+
+### 5.2 Renderizar na View (Sino de Notificações)
+```blade
+{{-- Contador de notificações não lidas --}}
+<span class="badge bg-danger">
+    {{ auth()->user()->unreadNotifications->count() }}
+</span>
+
+{{-- Listagem dos alertas --}}
+@foreach(auth()->user()->unreadNotifications as $notification)
+    <div class="alert alert-info">
+        <p>{{ $notification->data['mensagem'] }}</p>
+        <small>{{ $notification->created_at->diffForHumans() }}</small>
+    </div>
+@endforeach
+```
+
+### 5.3 Marcar Notificações como Lidas
+```php
+// Marcar TODAS as notificações do usuário como lidas
+auth()->user()->unreadNotifications->markAsRead();
+
+// Marcar UMA notificação específica como lida pelo ID
+auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
+```
+
+---
+
+## ⚡ 6. Automação do Disparo (Artisan Command)
+
+Você pode encadear buscas de banco com o envio das notificações criando um **Comando Personalizado**:
+
+```bash
+php artisan make:command DispararLembretesDiarios
+```
+
+No método `handle()` do arquivo criado em `app/Console/Commands/`:
+
+```php
+public function handle()
+{
+    $amanha = \Carbon\Carbon::tomorrow();
+
+    // Busca registros cuja data seja amanhã e ainda não notificados
+    $itens = MeuModel::whereDate('data_agendada', $amanha)
+        ->whereNull('notificado_em')
+        ->get();
+
+    foreach ($itens as $item) {
+        $item->user->notify(new ExemploAlertaNotification($item));
+        $item->update(['notificado_em' => now()]);
+    }
+
+    $this->info('Notificações enviadas com sucesso!');
+}
+```
+
+---
+
+## 💡 7. Boas Práticas e Pegadinhas Técnicas
+
+1. **Ajuste de Fuso Horário (`Timezone`):**  
+   Ao trabalhar com comparações de data (`Carbon::tomorrow()`), garanta que o arquivo `config/app.php` esteja configurado com `'timezone' => 'America/Sao_Paulo'` para evitar que as buscas fiquem desalinhadas com o horário local. Execute `php artisan config:clear` após a alteração.
+
+2. **Comparação de Colunas `DATETIME` no Eloquent:**  
+   Colunas do tipo `DATETIME` que armazenam horas/minutos (`YYYY-MM-DD HH:MM:SS`) falham em queries com `where()` exato. Prefira usar `whereDate('coluna', Carbon::tomorrow())` ou `whereRaw('DATE(coluna) = ?', [$data])`.
+
+3. **Performance com Envio Assíncrono (`Queue`):**  
+   Para evitar que o envio de e-mails trave a navegação da página do usuário, adicione a interface `ShouldQueue` na sua classe de Notificação:
+   ```php
+   use Illuminate\Contracts\Queue\ShouldQueue;
+
+   class ExemploAlertaNotification extends Notification implements ShouldQueue
+   {
+       use Queueable;
+       // ...
+   }
+   ```
