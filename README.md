@@ -4,7 +4,7 @@
 > **Disciplina:** Desenvolvimento Web 2 — IFPR Campus Curitiba  
 > **Professor:** Jair José Ferronato  
 > **Tema 09:** Notificações no Sistema e E-mail (`Illuminate\Notifications\Notification`)  
-> **Dupla:** Cauan de Souza Valter Stocco e João Pedro
+> **Dupla:** Cauan de Souza Valter Stocco e João Pedro Medeiros Becker
 
 ---
 
