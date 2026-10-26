@@ -8,7 +8,7 @@
 
 ---
 
-## 📌 1. O que são e por que usar Laravel Notifications?
+## 1. O que são e por que usar Laravel Notifications?
 
 O recurso de **Notifications** do Laravel é uma abstração desenhada para disparar mensagens através de **múltiplos canais de comunicação** (E-mail, Banco de Dados, SMS, Broadcast/WebSockets, Slack, etc.) utilizando uma **única classe responsável**.
 
@@ -18,7 +18,7 @@ O recurso de **Notifications** do Laravel é uma abstração desenhada para disp
 
 ---
 
-## 🛠️ 2. Requisitos e Configuração do Ambiente
+## 2. Requisitos e Configuração do Ambiente
 
 Para utilizar os canais de **Banco de Dados** (`database`) e **E-mail** (`mail`), siga o passo a passo de configuração abaixo em seu projeto:
 
@@ -49,7 +49,7 @@ MAIL_FROM_NAME="SeuSistema"
 
 ---
 
-## 📐 3. Estrutura da Classe Notification
+## 3. Estrutura da Classe Notification
 
 ### 3.1 Criar a Notificação via Artisan
 Rode o comando de criação no terminal:
@@ -111,7 +111,7 @@ class ExemploAlertaNotification extends Notification
 
 ---
 
-## 🚀 4. Como Disparar as Notificações
+## 4. Como Disparar as Notificações
 
 O Model que receberá os alertas (geralmente `App\Models\User`) **deve possuir a trait `Notifiable`**:
 
@@ -143,7 +143,7 @@ Notification::send($usuarios, new ExemploAlertaNotification($registro));
 
 ---
 
-## 💻 5. Lendo Notificações no Blade (`database`)
+## 5. Lendo Notificações no Blade (`database`)
 
 Ao salvar as notificações no banco, o Laravel injeta automaticamente métodos de consulta no usuário autenticado:
 
@@ -183,7 +183,7 @@ auth()->user()->notifications()->where('id', $id)->first()?->markAsRead();
 
 ---
 
-## ⚡ 6. Automação do Disparo (Artisan Command)
+## 6. Automação do Disparo (Artisan Command)
 
 Você pode encadear buscas de banco com o envio das notificações criando um **Comando Personalizado**:
 
@@ -214,7 +214,7 @@ public function handle()
 
 ---
 
-## 💡 7. Boas Práticas e Pegadinhas Técnicas
+## 7. Boas Práticas e Pegadinhas Técnicas
 
 1. **Ajuste de Fuso Horário (`Timezone`):**  
    Ao trabalhar com comparações de data (`Carbon::tomorrow()`), garanta que o arquivo `config/app.php` esteja configurado com `'timezone' => 'America/Sao_Paulo'` para evitar que as buscas fiquem desalinhadas com o horário local. Execute `php artisan config:clear` após a alteração.
